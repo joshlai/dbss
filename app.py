@@ -1,5 +1,11 @@
 from flask import Flask,render_template,request
 import joblib
+from groq import Groq
+import os
+
+# os.environ['GROQ_API_KEY'] = ""
+
+os.environ['GROQ_API_KEY'] = os.getenv("groq")
 
 app = Flask(__name__)
 
@@ -20,6 +26,27 @@ def main():
 def dbs():
     return(render_template("dbs.html"))
 
+@app.route("/llama",methods=["GET","POST"])
+def llama():
+    return(render_template("llama.html"))
+
+
+@app.route("/llama_reply",methods=["GET","POST"])
+def llama_reply():
+    q = request.form.get("q")
+
+    # load model
+    client = Groq()
+    completion = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {
+                "role": "user",
+                "content": q
+            }
+        ]
+    )
+    return(render_template("llama_reply.html",r=completion.choices[0].message.content))
 
 
 
